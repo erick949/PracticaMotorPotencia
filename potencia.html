@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bloquear zoom -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Indicador de Potencia</title>
 <style>
   body {
@@ -14,6 +16,8 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
+    margin: 0;
+    overflow: hidden;
   }
 
   h1 {
@@ -48,6 +52,23 @@
 <div class="contenedor" id="contenedor"></div>
 
 <script>
+  // --- BLOQUEO DE ZOOM ---
+  // Bloquear zoom con Ctrl + rueda del ratón
+  document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+
+  // Bloquear zoom con Ctrl + + / - / = 
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
+      e.preventDefault();
+    }
+  });
+
+  // Bloquear zoom táctil
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  // -----------------------
+
   const totalPotencia = 10;
   const contenedor = document.getElementById('contenedor');
   const texto = document.getElementById('texto-potencia');

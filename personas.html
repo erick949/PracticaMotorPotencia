@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Desactiva el zoom del usuario -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Indicador de Personas</title>
 <style>
   body {
@@ -11,6 +13,8 @@
     font-family: 'Arial', sans-serif;
     text-align: center;
     padding: 40px;
+    margin: 0;
+    overflow: hidden;
   }
 
   .personas {
@@ -61,6 +65,21 @@
 <div class="personas" id="contenedor"></div>
 
 <script>
+  // Evitar zoom con Ctrl + rueda del ratón
+  document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+
+  // Evitar zoom con Ctrl + + / -
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
+      e.preventDefault();
+    }
+  });
+
+  // Evitar zoom por gestos táctiles
+  document.addEventListener('gesturestart', e => e.preventDefault());
+
   const totalPersonas = 10;
   const contenedor = document.getElementById('contenedor');
   const porcentajeTexto = document.getElementById('porcentaje');
