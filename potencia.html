@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indicador de Potencia</title>
+<style>
+  body {
+    background-color: #0b1221;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    transition: color 0.3s;
+  }
+
+  .contenedor {
+    position: relative;
+    width: 220px;
+    height: 220px;
+  }
+
+  .pentagono {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    background-color: #ffffff10;
+    transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .nivel-activo {
+    box-shadow: 0 0 20px #00ff55a0;
+  }
+</style>
+</head>
+<body>
+
+<h1 id="texto-potencia">Potencia: 0/10</h1>
+<div class="contenedor" id="contenedor"></div>
+
+<script>
+  const totalPotencia = 10;
+  const contenedor = document.getElementById('contenedor');
+  const texto = document.getElementById('texto-potencia');
+
+  // Crear capas solo una vez
+  for (let i = 0; i < totalPotencia; i++) {
+    const capa = document.createElement('div');
+    capa.classList.add('pentagono');
+    const scale = 1 - (i * 0.08);
+    capa.style.transform = `scale(${scale})`;
+    contenedor.appendChild(capa);
+  }
+
+  const capas = [...contenedor.children].reverse();
+
+  function calcularColor(nivel) {
+    const r = Math.min(255, Math.round((nivel / totalPotencia) * 255 * 1.5));
+    const g = Math.max(0, Math.round(255 - (nivel / totalPotencia) * 255));
+    return `rgb(${r}, ${g}, 50)`;
+  }
+
+  function setPotencia(valor) {
+    const potencia = Math.min(Math.max(valor, 0), totalPotencia);
+    texto.textContent = `Potencia: ${potencia}/10`;
+
+    const colorActual = calcularColor(potencia);
+    texto.style.color = colorActual;
+
+    capas.forEach((capa, i) => {
+      if (i < potencia) {
+        const colorCapa = calcularColor(i + 1);
+        capa.classList.add('nivel-activo');
+        capa.style.background = `radial-gradient(circle at center, ${colorCapa} 30%, transparent 100%)`;
+        capa.style.boxShadow = `0 0 20px ${colorCapa}80`;
+      } else {
+        capa.classList.remove('nivel-activo');
+        capa.style.background = '#ffffff10';
+        capa.style.boxShadow = 'none';
+      }
+    });
+  }
+
+  // Ejemplo inicial
+  setPotencia(3);
+</script>
+
+</body>
+</html>
