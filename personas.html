@@ -137,7 +137,7 @@
 
     // Verificar desbordamiento
     if (cantidad > total) {
-      porcentajeTexto.textContent = `🚨 ¡Desbordamiento! ${exceso} persona(s) deben salir.`;
+      porcentajeTexto.textContent = `🚨 ${exceso} persona(s) deben salir.`;
       porcentajeTexto.classList.add('alarma');
       document.body.classList.add('alarma');
       habilitar(false); // 🔒 Bloquear sistema
