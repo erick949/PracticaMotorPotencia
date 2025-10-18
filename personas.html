@@ -77,6 +77,17 @@
   .aviso.visible {
     opacity: 1;
   }
+
+  /* --- Alarma de desbordamiento --- */
+  .alarma {
+    animation: parpadeo 0.5s infinite alternate;
+    color: #ff4444 !important;
+  }
+
+  @keyframes parpadeo {
+    from { background-color: #0b1221; }
+    to { background-color: #441111; }
+  }
 </style>
 </head>
 <body>
@@ -84,6 +95,7 @@
 <h1 id="porcentaje">0%</h1>
 <div class="personas" id="contenedor"></div>
 <div class="aviso" id="aviso">⚠ Indicador deshabilitado</div>
+<div class="aviso" id="alarma"></div>
 
 <script>
   // Evitar zoom con Ctrl o gestos táctiles
@@ -95,6 +107,7 @@
   const contenedor = document.getElementById('contenedor');
   const porcentajeTexto = document.getElementById('porcentaje');
   const aviso = document.getElementById('aviso');
+  const alarmaDiv = document.getElementById('alarma');
 
   let habilitado = false; // 🔒 Inicia deshabilitado
 
@@ -117,15 +130,28 @@
 
     contenedor.innerHTML = "";
     const total = totalPersonas;
+    const exceso = cantidad - total;
     const valor = Math.min(Math.max(cantidad, 0), total);
     const porcentaje = Math.round((valor / total) * 100);
     porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
 
+    // Mostrar figuras activas
     for (let i = 0; i < total; i++) {
       const div = document.createElement('div');
       div.classList.add('persona');
       if (i < valor) div.classList.add('activa');
       contenedor.appendChild(div);
+    }
+
+    // Verificar desbordamiento
+    if (cantidad > total) {
+      alarmaDiv.textContent = `🚨 ¡Desbordamiento! ${exceso} persona(s) deben salir para estabilizar.`;
+      alarmaDiv.classList.add('visible', 'alarma');
+      document.body.classList.add('alarma');
+    } else {
+      alarmaDiv.textContent = "";
+      alarmaDiv.classList.remove('visible', 'alarma');
+      document.body.classList.remove('alarma');
     }
   }
 
@@ -134,13 +160,8 @@
   setPersonas(0);
   habilitar(false); // inicia deshabilitado
 
-  // 💡 Ejemplo de activación manual (puedes quitar esto en producción)
-  // Simula que llega un comando externo:
-  // setTimeout(() => {
-  //   habilitar(true);
-  //   setPersonas(6);
-  // }, 3000);
-
+  // 💡 Ejemplo de prueba (puedes borrar esto)
+  // setTimeout(() => { habilitar(true); setPersonas(12); }, 2000);
 </script>
 
 </body>
