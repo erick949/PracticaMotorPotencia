@@ -56,7 +56,6 @@
     font-size: 3em;
     margin: 0;
     color: #00aaff;
-    transition: color 0.3s ease;
   }
 
   /* --- Estado deshabilitado --- */
@@ -78,17 +77,6 @@
   .aviso.visible {
     opacity: 1;
   }
-
-  /* --- Alarma de desbordamiento --- */
-  .alarma {
-    animation: parpadeo 0.5s infinite alternate;
-    color: #ff4444 !important;
-  }
-
-  @keyframes parpadeo {
-    from { background-color: #0b1221; }
-    to { background-color: #441111; }
-  }
 </style>
 </head>
 <body>
@@ -108,7 +96,7 @@
   const porcentajeTexto = document.getElementById('porcentaje');
   const aviso = document.getElementById('aviso');
 
-  let habilitado = false;
+  let habilitado = false; // 🔒 Inicia deshabilitado
 
   function habilitar(estado) {
     habilitado = estado;
@@ -122,33 +110,17 @@
   }
 
   function setPersonas(cantidad) {
-    // Si el indicador está deshabilitado por desbordamiento,
-    // solo se permite actualizar si vuelve a un valor <= 10.
-    if (!habilitado && cantidad > totalPersonas) {
-      console.warn("⚠ Desbordado: no se aceptan cambios hasta que se normalice.");
+    if (!habilitado) {
+      console.warn("⚠ setPersonas() ignorado: indicador deshabilitado");
       return;
     }
 
     contenedor.innerHTML = "";
     const total = totalPersonas;
-    const exceso = cantidad - total;
     const valor = Math.min(Math.max(cantidad, 0), total);
     const porcentaje = Math.round((valor / total) * 100);
+    porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
 
-    // Verificar desbordamiento
-    if (cantidad > total) {
-      porcentajeTexto.textContent = `🚨 ${exceso} persona(s) deben salir.`;
-      porcentajeTexto.classList.add('alarma');
-      document.body.classList.add('alarma');
-      habilitar(false); // 🔒 Bloquear sistema
-    } else {
-      porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
-      porcentajeTexto.classList.remove('alarma');
-      document.body.classList.remove('alarma');
-      if (!habilitado) habilitar(true); // ✅ Reactivar al normalizar
-    }
-
-    // Mostrar figuras activas
     for (let i = 0; i < total; i++) {
       const div = document.createElement('div');
       div.classList.add('persona');
@@ -162,8 +134,13 @@
   setPersonas(0);
   habilitar(false); // inicia deshabilitado
 
-  // 💡 Ejemplo de prueba (puedes quitar esto)
-  // setTimeout(() => { habilitar(true); setPersonas(12); }, 2000);
+  // 💡 Ejemplo de activación manual (puedes quitar esto en producción)
+  // Simula que llega un comando externo:
+  // setTimeout(() => {
+  //   habilitar(true);
+  //   setPersonas(6);
+  // }, 3000);
+
 </script>
 
 </body>
