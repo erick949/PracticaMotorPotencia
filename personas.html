@@ -56,6 +56,7 @@
     font-size: 3em;
     margin: 0;
     color: #00aaff;
+    transition: color 0.3s ease;
   }
 
   /* --- Estado deshabilitado --- */
@@ -95,7 +96,6 @@
 <h1 id="porcentaje">0%</h1>
 <div class="personas" id="contenedor"></div>
 <div class="aviso" id="aviso">⚠ Indicador deshabilitado</div>
-<div class="aviso" id="alarma"></div>
 
 <script>
   // Evitar zoom con Ctrl o gestos táctiles
@@ -107,9 +107,8 @@
   const contenedor = document.getElementById('contenedor');
   const porcentajeTexto = document.getElementById('porcentaje');
   const aviso = document.getElementById('aviso');
-  const alarmaDiv = document.getElementById('alarma');
 
-  let habilitado = false; // 🔒 Inicia deshabilitado
+  let habilitado = false;
 
   function habilitar(estado) {
     habilitado = estado;
@@ -123,8 +122,10 @@
   }
 
   function setPersonas(cantidad) {
-    if (!habilitado) {
-      console.warn("⚠ setPersonas() ignorado: indicador deshabilitado");
+    // Si el indicador está deshabilitado por desbordamiento,
+    // solo se permite actualizar si vuelve a un valor <= 10.
+    if (!habilitado && cantidad > totalPersonas) {
+      console.warn("⚠ Desbordado: no se aceptan cambios hasta que se normalice.");
       return;
     }
 
@@ -133,7 +134,19 @@
     const exceso = cantidad - total;
     const valor = Math.min(Math.max(cantidad, 0), total);
     const porcentaje = Math.round((valor / total) * 100);
-    porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
+
+    // Verificar desbordamiento
+    if (cantidad > total) {
+      porcentajeTexto.textContent = `🚨 ¡Desbordamiento! ${exceso} persona(s) deben salir.`;
+      porcentajeTexto.classList.add('alarma');
+      document.body.classList.add('alarma');
+      habilitar(false); // 🔒 Bloquear sistema
+    } else {
+      porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
+      porcentajeTexto.classList.remove('alarma');
+      document.body.classList.remove('alarma');
+      if (!habilitado) habilitar(true); // ✅ Reactivar al normalizar
+    }
 
     // Mostrar figuras activas
     for (let i = 0; i < total; i++) {
@@ -142,17 +155,6 @@
       if (i < valor) div.classList.add('activa');
       contenedor.appendChild(div);
     }
-
-    // Verificar desbordamiento
-    if (cantidad > total) {
-      alarmaDiv.textContent = `🚨 ¡Desbordamiento! ${exceso} persona(s) deben salir para estabilizar.`;
-      alarmaDiv.classList.add('visible', 'alarma');
-      document.body.classList.add('alarma');
-    } else {
-      alarmaDiv.textContent = "";
-      alarmaDiv.classList.remove('visible', 'alarma');
-      document.body.classList.remove('alarma');
-    }
   }
 
   // --- Inicialización ---
@@ -160,7 +162,7 @@
   setPersonas(0);
   habilitar(false); // inicia deshabilitado
 
-  // 💡 Ejemplo de prueba (puedes borrar esto)
+  // 💡 Ejemplo de prueba (puedes quitar esto)
   // setTimeout(() => { habilitar(true); setPersonas(12); }, 2000);
 </script>
 
