@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<!-- Bloquear zoom -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Indicador de Potencia</title>
@@ -30,6 +29,7 @@
     position: relative;
     width: 220px;
     height: 220px;
+    transition: all 0.3s ease;
   }
 
   .pentagono {
@@ -44,36 +44,49 @@
   .nivel-activo {
     box-shadow: 0 0 20px #00ff55a0;
   }
+
+  /* --- Estado deshabilitado --- */
+  .deshabilitado {
+    opacity: 0.4;
+    filter: blur(3px) brightness(0.8);
+    pointer-events: none;
+  }
+
+  .aviso {
+    margin-top: 20px;
+    color: #ff5555;
+    font-weight: bold;
+    font-size: 1.1em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .aviso.visible {
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
 
 <h1 id="texto-potencia">Potencia: 0/10</h1>
 <div class="contenedor" id="contenedor"></div>
+<div class="aviso" id="aviso">⚠ Indicador deshabilitado</div>
 
 <script>
   // --- BLOQUEO DE ZOOM ---
-  // Bloquear zoom con Ctrl + rueda del ratón
-  document.addEventListener('wheel', function(e) {
-    if (e.ctrlKey) e.preventDefault();
-  }, { passive: false });
-
-  // Bloquear zoom con Ctrl + + / - / = 
-  document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
-      e.preventDefault();
-    }
-  });
-
-  // Bloquear zoom táctil
+  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && ['+','-','='].includes(e.key)) e.preventDefault(); });
   document.addEventListener('gesturestart', e => e.preventDefault());
-  // -----------------------
+  // ------------------------
 
   const totalPotencia = 10;
   const contenedor = document.getElementById('contenedor');
   const texto = document.getElementById('texto-potencia');
+  const aviso = document.getElementById('aviso');
 
-  // Crear capas solo una vez
+  let habilitado = false; // 🔒 Inicia deshabilitado
+
+  // Crear capas del pentágono una sola vez
   for (let i = 0; i < totalPotencia; i++) {
     const capa = document.createElement('div');
     capa.classList.add('pentagono');
@@ -90,7 +103,25 @@
     return `rgb(${r}, ${g}, 50)`;
   }
 
+  // ✅ Función para habilitar/deshabilitar visualmente el indicador
+  function habilitar(estado) {
+    habilitado = estado;
+    if (habilitado) {
+      contenedor.classList.remove('deshabilitado');
+      aviso.classList.remove('visible');
+    } else {
+      contenedor.classList.add('deshabilitado');
+      aviso.classList.add('visible');
+    }
+  }
+
+  // ⚙️ Actualiza el nivel de potencia (solo si está habilitado)
   function setPotencia(valor) {
+    if (!habilitado) {
+      console.warn("⚠ setPotencia() ignorado: indicador deshabilitado");
+      return;
+    }
+
     const potencia = Math.min(Math.max(valor, 0), totalPotencia);
     texto.textContent = `Potencia: ${potencia}/10`;
 
@@ -111,8 +142,16 @@
     });
   }
 
-  // Ejemplo inicial
-  setPotencia(3);
+  // --- Inicialización ---
+  habilitar(true); // Inicia deshabilitado
+  setPotencia(0);   // Valor inicial visual
+  habilitar(false); // Inicia deshabilitado
+
+  // 💡 Ejemplo de activación (puedes quitar esto en producción)
+  // setTimeout(() => {
+  //   habilitar(true);
+  //   setPotencia(6);
+  // }, 3000);
 </script>
 
 </body>

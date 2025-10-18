@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<!-- Desactiva el zoom del usuario -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Indicador de Personas</title>
@@ -22,6 +21,7 @@
     justify-content: center;
     gap: 10px;
     margin-top: 30px;
+    transition: all 0.3s ease;
   }
 
   .persona {
@@ -57,39 +57,69 @@
     margin: 0;
     color: #00aaff;
   }
+
+  /* --- Estado deshabilitado --- */
+  .deshabilitado {
+    opacity: 0.4;
+    filter: blur(3px) brightness(0.8);
+    pointer-events: none;
+  }
+
+  .aviso {
+    margin-top: 20px;
+    color: #ff5555;
+    font-weight: bold;
+    font-size: 1.1em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .aviso.visible {
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
 
 <h1 id="porcentaje">0%</h1>
 <div class="personas" id="contenedor"></div>
+<div class="aviso" id="aviso">⚠ Indicador deshabilitado</div>
 
 <script>
-  // Evitar zoom con Ctrl + rueda del ratón
-  document.addEventListener('wheel', function(e) {
-    if (e.ctrlKey) e.preventDefault();
-  }, { passive: false });
-
-  // Evitar zoom con Ctrl + + / -
-  document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
-      e.preventDefault();
-    }
-  });
-
-  // Evitar zoom por gestos táctiles
+  // Evitar zoom con Ctrl o gestos táctiles
+  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && ['+','-','='].includes(e.key)) e.preventDefault(); });
   document.addEventListener('gesturestart', e => e.preventDefault());
 
   const totalPersonas = 10;
   const contenedor = document.getElementById('contenedor');
   const porcentajeTexto = document.getElementById('porcentaje');
+  const aviso = document.getElementById('aviso');
+
+  let habilitado = false; // 🔒 Inicia deshabilitado
+
+  function habilitar(estado) {
+    habilitado = estado;
+    if (habilitado) {
+      contenedor.classList.remove('deshabilitado');
+      aviso.classList.remove('visible');
+    } else {
+      contenedor.classList.add('deshabilitado');
+      aviso.classList.add('visible');
+    }
+  }
 
   function setPersonas(cantidad) {
+    if (!habilitado) {
+      console.warn("⚠ setPersonas() ignorado: indicador deshabilitado");
+      return;
+    }
+
     contenedor.innerHTML = "";
     const total = totalPersonas;
     const valor = Math.min(Math.max(cantidad, 0), total);
     const porcentaje = Math.round((valor / total) * 100);
-    porcentajeTexto.textContent = `${porcentaje}%`;
+    porcentajeTexto.textContent = `Capacidad: ${porcentaje}%`;
 
     for (let i = 0; i < total; i++) {
       const div = document.createElement('div');
@@ -99,8 +129,18 @@
     }
   }
 
-  // Ejemplo inicial
-  setPersonas(4);
+  // --- Inicialización ---
+  habilitar(true);
+  setPersonas(0);
+  habilitar(false); // inicia deshabilitado
+
+  // 💡 Ejemplo de activación manual (puedes quitar esto en producción)
+  // Simula que llega un comando externo:
+  // setTimeout(() => {
+  //   habilitar(true);
+  //   setPersonas(6);
+  // }, 3000);
+
 </script>
 
 </body>
