@@ -118,7 +118,7 @@
     contenedor.innerHTML = "";
     const total = totalPersonas;
     const valor = Math.min(Math.max(cantidad, 0), total);
-    contadorTexto.textContent = `${valor} / ${total} personas`;
+    contadorTexto.textContent = `personas: ${valor}/${total}`;
 
     for (let i = 0; i < total; i++) {
       const div = document.createElement('div');
