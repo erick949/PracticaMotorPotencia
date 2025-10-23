@@ -68,7 +68,7 @@
 </head>
 <body>
 
-<h1 id="texto-potencia">Potencia: 0/10</h1>
+<h1 id="texto-potencia">Potencia: 0%</h1>
 <div class="contenedor" id="contenedor"></div>
 <div class="aviso" id="aviso">⚠ Indicador deshabilitado</div>
 
@@ -123,7 +123,8 @@
     }
 
     const potencia = Math.min(Math.max(valor, 0), totalPotencia);
-    texto.textContent = `Potencia: ${potencia}/10`;
+    const porcentaje = Math.round((potencia / totalPotencia) * 100);
+    texto.textContent = `Potencia: ${porcentaje}%`;
 
     const colorActual = calcularColor(potencia);
     texto.style.color = colorActual;
@@ -143,8 +144,8 @@
   }
 
   // --- Inicialización ---
-  habilitar(true); // Inicia deshabilitado
-  setPotencia(0);   // Valor inicial visual
+  habilitar(true);  // puedes dejarlo en true si quieres que arranque habilitado
+  setPotencia(0);   // Valor inicial
   habilitar(false); // Inicia deshabilitado
 
   // 💡 Ejemplo de activación (puedes quitar esto en producción)
